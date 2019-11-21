@@ -1,5 +1,6 @@
 ---
 - name: Converge
   hosts: all
-  roles:
-    - role: stackhpc.rundeck
+  tasks:
+    - include_role:
+        name: stackhpc.rundeck

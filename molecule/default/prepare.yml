@@ -1,0 +1,35 @@
+---
+- name: Prepare
+  hosts: all
+  vars:
+    pip_install_packages:
+      - name: more_itertools<6.0
+      - name: docker
+      - name: docker_compose
+  tasks:
+    - name: install dependencies
+      package:
+        name: "{{ item }}"
+      with_items:
+        - python-devel
+        - python-virtualenv
+        - gcc
+        - libffi-devel
+    - include_role:
+        name: geerlingguy.pip
+    - include_role:
+        name: geerlingguy.docker
+    - name: create /etc/docker
+      file:
+        state: directory
+        path: /etc/docker
+
+    # VFS is the only storage driver that it guarenteed to work
+    # on top of the others.
+    - name: set storage-driver to vfs via daemon.json
+      copy:
+        content: |
+          {
+            "storage-driver": "vfs"
+          }
+        dest: /etc/docker/daemon.json

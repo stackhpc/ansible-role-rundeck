@@ -1,2 +1,40 @@
 ---
 # defaults file for stackhpc.rundeck
+
+rundeck_docker_file_rpath: /opt/rundeck/rundeck-ansible
+
+rundeck_public_ip: "{{ ansible_default_ipv4.address }}"
+
+# root password for mariadb
+rundeck_sql_root_pass: changeme
+
+# user that rundeck uses to connect to mariadb
+rundeck_sql_user_pass: changeme
+
+# unprivilaged rundeck user
+rundeck_user: stack
+
+# unprivilaged rundeck user
+rundeck_user_pass: changeme
+
+# admin rundeck user
+rundeck_admin_pass: changeme
+
+rundeck_admin_roles:
+  - user
+  - admin
+  - architect
+  - deploy
+  - build
+
+rundeck_user_roles:
+  - user
+  - deploy
+
+rundeck_users:
+  - username: "admin"
+    password: "{{ rundeck_admin_pass }}"
+    roles: "{{ rundeck_admin_roles }}"
+  - username: "{{ rundeck_user }}"
+    password: "{{ rundeck_user_pass }}"
+    roles: "{{ rundeck_user_roles }}"

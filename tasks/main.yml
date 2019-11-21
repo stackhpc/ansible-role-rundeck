@@ -1,2 +1,88 @@
 ---
 # tasks file for stackhpc.rundeck
+
+# vi: set ts=2 sts=2 sw=2 et ft=yaml
+
+- name: Make config directory
+  file:
+    path: "/etc/rundeck"
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  become: true
+
+- name: Make resources directory
+  file:
+    path: "{{ rundeck_docker_file_rpath }}"
+    state: directory
+    owner: root
+    group: root
+    recurse: true
+    mode: 0700
+  become: true
+
+- name: Template files
+  template:
+    src: "{{ item }}"
+    dest: /etc/rundeck/{{ no_ext }}
+    owner: "1000"  # rundeck user in container
+    group: "0"
+    # not ideal as these files contain passwords
+    mode: 0660
+  vars:
+    no_ext: "{{ (item | basename | splitext)[0] }}"
+  with_items:
+    - Deploy.aclpolicy.j2
+    - realm.properties.j2
+    # - inventory.j2
+  become: true
+
+- name: Template docker file
+  template:
+    src: Dockerfile.j2
+    dest: "{{ rundeck_docker_file_rpath }}/Dockerfile"
+  become: true
+
+- name: Configure docker services
+  docker_service:
+    project_name: rundeck
+    definition:
+      version: '3'
+      services:
+        mariadb:
+          image: mariadb:10.4.10
+          ports:
+            - 3306:3306
+          environment:
+            MYSQL_ROOT_PASSWORD: "{{ rundeck_sql_root_pass }}"
+            MYSQL_DATABASE: rundeckdb
+            MYSQL_USER: rundeck
+            MYSQL_PASSWORD: "{{ rundeck_sql_user_pass }}"
+          command: ['--connect-timeout=120']
+          volumes:
+            - dbdata:/var/lib/mysql
+        rundeck:
+          build: "{{ rundeck_docker_file_rpath }}"
+          depends_on:
+            - mariadb
+          ports:
+            - 4440:4440
+          links:
+            - mariadb
+          volumes:
+            # - /etc/rundeck/inventory:/etc/ansible/hosts
+            - /etc/rundeck/realm.properties:/home/rundeck/server/config/realm.properties
+            - /etc/rundeck/Deploy.aclpolicy:/home/rundeck/etc/Deploy.aclpolicy
+            - data:/home/rundeck/server/data
+          environment:
+            RUNDECK_DATABASE_DRIVER: com.mysql.jdbc.Driver
+            RUNDECK_ADMIN_PASSWORD: "{{ rundeck_admin_pass }}"
+            RUNDECK_DATABASE_URL: jdbc:mysql://mariadb/rundeckdb?autoReconnect=true&useSSL=false
+            RUNDECK_DATABASE_USERNAME: rundeck
+            RUNDECK_DATABASE_PASSWORD: "{{ rundeck_sql_user_pass }}"
+            RUNDECK_GRAILS_URL: http://{{ rundeck_public_ip }}:4440
+      volumes:
+        data:
+        dbdata:
+  become: true
