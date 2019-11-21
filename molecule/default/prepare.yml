@@ -17,9 +17,3 @@
         - libffi-devel
     - include_role:
         name: geerlingguy.pip
-    - include_role:
-        name: geerlingguy.docker
-    - name: create /etc/docker
-      file:
-        state: directory
-        path: /etc/docker
