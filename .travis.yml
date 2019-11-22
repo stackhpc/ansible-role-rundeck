@@ -13,7 +13,7 @@ before_install:
   - |
     echo '{
       "experimental": true,
-      "storage-driver": "overlay2",
+      "storage-driver": "vfs",
       "max-concurrent-downloads": 50,
       "max-concurrent-uploads": 50
     }' | sudo tee /etc/docker/daemon.json
