@@ -74,6 +74,7 @@
             - mariadb
           volumes:
             # - /etc/rundeck/inventory:/etc/ansible/hosts
+            - /var/run/docker.sock:/var/run/docker.sock
             - /etc/rundeck/realm.properties:/home/rundeck/server/config/realm.properties
             - /etc/rundeck/Deploy.aclpolicy:/home/rundeck/etc/Deploy.aclpolicy
             - data:/home/rundeck/server/data
