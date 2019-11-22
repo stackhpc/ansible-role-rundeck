@@ -20,6 +20,8 @@
     group: root
     recurse: true
     mode: 0700
+  # Was failing idempotency issues on travis
+  changed_when: false
   become: true
 
 - name: Template files
