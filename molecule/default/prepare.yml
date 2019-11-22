@@ -23,3 +23,13 @@
       file:
         state: directory
         path: /etc/docker
+
+    # VFS is the only storage driver that it guarenteed to work
+    # on top of the others.
+    - name: set storage-driver to vfs via daemon.json
+      copy:
+        content: |
+          {
+            "storage-driver": "vfs"
+          }
+        dest: /etc/docker/daemon.json
