@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-
+  role_name: rundeck
   author: Will Szumski
   description: Deploys and configures rundeck
 
